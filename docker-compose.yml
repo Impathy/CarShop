@@ -1,0 +1,111 @@
+services:
+  order-postgres:
+    image: postgres:16-alpine
+    container_name: impathy-order-postgres
+    environment:
+      POSTGRES_DB: impathy_order
+      POSTGRES_USER: impathy
+      POSTGRES_PASSWORD: impathy
+    ports:
+      - "5432:5432"
+    volumes:
+      - order_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U impathy -d impathy_order"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  storage-postgres:
+    image: postgres:16-alpine
+    container_name: impathy-storage-postgres
+    environment:
+      POSTGRES_DB: impathy_storage
+      POSTGRES_USER: impathy
+      POSTGRES_PASSWORD: impathy
+    ports:
+      - "5433:5432"
+    volumes:
+      - storage_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U impathy -d impathy_storage"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: impathy-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    container_name: impathy-keycloak
+    command: ["start-dev", "--import-realm", "--http-port=8081"]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./docker/keycloak/impathy-realm.json:/opt/keycloak/data/import/impathy-realm.json
+    depends_on:
+      order-postgres:
+        condition: service_healthy
+
+  order-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: impathy-order-service
+    command: ["--spring.profiles.active=order"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://order-postgres:5432/impathy_order
+      SPRING_DATASOURCE_USERNAME: impathy
+      SPRING_DATASOURCE_PASSWORD: impathy
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8081/realms/impathy-realm/protocol/openid-connect/certs
+      SPRINGDOC_SWAGGER_UI_OAUTH2_REDIRECT_URL: http://localhost:8080/swagger-ui/oauth2-redirect.html
+      APP_GRPC_STORAGE_HOST: storage-service
+      APP_GRPC_STORAGE_PORT: 9091
+      APP_GRPC_TIMEOUT_MS: 2000
+    ports:
+      - "8080:8080"
+    depends_on:
+      order-postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      keycloak:
+        condition: service_started
+
+  storage-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: impathy-storage-service
+    command: ["--spring.profiles.active=storage"]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://storage-postgres:5432/impathy_storage
+      SPRING_DATASOURCE_USERNAME: impathy
+      SPRING_DATASOURCE_PASSWORD: impathy
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8081/realms/impathy-realm/protocol/openid-connect/certs
+      SPRINGDOC_SWAGGER_UI_OAUTH2_REDIRECT_URL: http://localhost:8082/swagger-ui/oauth2-redirect.html
+      APP_GRPC_SERVER_PORT: 9091
+    ports:
+      - "8082:8080"
+      - "9091:9091"
+    depends_on:
+      storage-postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+      keycloak:
+        condition: service_started
+
+volumes:
+  order_postgres_data:
+  storage_postgres_data:

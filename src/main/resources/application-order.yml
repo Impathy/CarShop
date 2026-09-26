@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/impathy_order
+    username: impathy
+    password: impathy
+
+app:
+  grpc:
+    storage-host: localhost
+    storage-port: 9091
+    timeout-ms: 2000
+
+springdoc:
+  swagger-ui:
+    oauth2-redirect-url: http://localhost:8080/swagger-ui/oauth2-redirect.html

@@ -1,0 +1,38 @@
+spring:
+  profiles:
+    default: order
+  datasource:
+    url: jdbc:postgresql://localhost:5432/impathy
+    username: impathy
+    password: impathy
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8081/realms/impathy-realm/protocol/openid-connect/certs
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    oauth:
+      client-id: impathy-api
+      use-pkce-with-authorization-code-grant: true
+      scopes: openid,profile,email

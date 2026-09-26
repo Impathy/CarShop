@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package impathy.cars.v1;
+
+option java_multiple_files = true;
+option java_package = "ru.impathy.grpc.cars.v1";
+option java_outer_classname = "CarInventoryProto";
+
+import "google/protobuf/empty.proto";
+
+service CarInventoryService {
+  rpc ListAvailableCars(google.protobuf.Empty) returns (AvailableCarsResponse);
+  rpc GetAvailableCar(CarIdRequest) returns (AvailableCarResponse);
+}
+
+message AvailableCar {
+  string id = 1;
+  string brand = 2;
+  string model_name = 3;
+  string body_type = 4;
+  string fuel_type = 5;
+  string gearbox_type = 6;
+  string drive_type = 7;
+  string color = 8;
+  int32 engine_power_hp = 9;
+  double engine_volume = 10;
+  int32 base_price = 11;
+  int32 extra_price = 12;
+  int32 available_quantity = 13;
+}
+
+message CarIdRequest {
+  string id = 1;
+}
+
+message AvailableCarsResponse {
+  repeated AvailableCar cars = 1;
+}
+
+message AvailableCarResponse {
+  AvailableCar car = 1;
+}
+

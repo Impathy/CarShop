@@ -1,0 +1,476 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-create-users
+      author: impathy
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: name, type: VARCHAR(255), constraints: { nullable: false } }
+              - column: { name: access_level, type: VARCHAR(50), constraints: { nullable: false } }
+
+  - changeSet:
+      id: 002-create-car-parts
+      author: impathy
+      changes:
+        - createTable:
+            tableName: car_parts
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: name, type: VARCHAR(255), constraints: { nullable: false } }
+              - column: { name: component_type, type: VARCHAR(50), constraints: { nullable: false } }
+              - column: { name: price, type: INT, constraints: { nullable: false } }
+
+  - changeSet:
+      id: 003-create-car-parts-compatible-models
+      author: impathy
+      changes:
+        - createTable:
+            tableName: car_part_compatible_models
+            columns:
+              - column: { name: car_part_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: model_name, type: VARCHAR(255), constraints: { nullable: false } }
+        - addForeignKeyConstraint:
+            baseTableName: car_part_compatible_models
+            baseColumnNames: car_part_id
+            constraintName: fk_compatible_models_part
+            referencedTableName: car_parts
+            referencedColumnNames: id
+
+  - changeSet:
+      id: 004-create-cars
+      author: impathy
+      changes:
+        - createTable:
+            tableName: cars
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: brand, type: VARCHAR(255), constraints: { nullable: false } }
+              - column: { name: model_name, type: VARCHAR(255), constraints: { nullable: false } }
+              - column: { name: body_type, type: VARCHAR(50), constraints: { nullable: false } }
+              - column: { name: fuel_type, type: VARCHAR(50), constraints: { nullable: false } }
+              - column: { name: gearbox_type, type: VARCHAR(50), constraints: { nullable: false } }
+              - column: { name: drive_type, type: VARCHAR(50), constraints: { nullable: false } }
+              - column: { name: color, type: VARCHAR(100), constraints: { nullable: false } }
+              - column: { name: engine_power_hp, type: INT, constraints: { nullable: false } }
+              - column: { name: engine_volume, type: DOUBLE PRECISION, constraints: { nullable: false } }
+              - column: { name: base_price, type: INT, constraints: { nullable: false } }
+              - column: { name: extra_price, type: INT, constraints: { nullable: false } }
+
+  - changeSet:
+      id: 005-create-car-base-parts
+      author: impathy
+      changes:
+        - createTable:
+            tableName: car_base_parts
+            columns:
+              - column: { name: car_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: car_part_id, type: UUID, constraints: { nullable: false } }
+        - addForeignKeyConstraint:
+            baseTableName: car_base_parts
+            baseColumnNames: car_id
+            constraintName: fk_car_base_parts_car
+            referencedTableName: cars
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: car_base_parts
+            baseColumnNames: car_part_id
+            constraintName: fk_car_base_parts_part
+            referencedTableName: car_parts
+            referencedColumnNames: id
+
+  - changeSet:
+      id: 006-create-orders
+      author: impathy
+      changes:
+        - createTable:
+            tableName: in_stock_car_orders
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: client_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: manager_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: car_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: status, type: VARCHAR(50), constraints: { nullable: false } }
+        - createTable:
+            tableName: custom_car_orders
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: client_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: manager_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: configured_car_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: status, type: VARCHAR(50), constraints: { nullable: false } }
+        - addForeignKeyConstraint:
+            baseTableName: in_stock_car_orders
+            baseColumnNames: client_id
+            constraintName: fk_in_stock_order_client
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: in_stock_car_orders
+            baseColumnNames: manager_id
+            constraintName: fk_in_stock_order_manager
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: in_stock_car_orders
+            baseColumnNames: car_id
+            constraintName: fk_in_stock_order_car
+            referencedTableName: cars
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: custom_car_orders
+            baseColumnNames: client_id
+            constraintName: fk_custom_order_client
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: custom_car_orders
+            baseColumnNames: manager_id
+            constraintName: fk_custom_order_manager
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: custom_car_orders
+            baseColumnNames: configured_car_id
+            constraintName: fk_custom_order_car
+            referencedTableName: cars
+            referencedColumnNames: id
+
+  - changeSet:
+      id: 007-create-test-drive
+      author: impathy
+      changes:
+        - createTable:
+            tableName: test_drive_cars
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: car_id, type: UUID, constraints: { nullable: false } }
+        - createTable:
+            tableName: test_drive_requests
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: client_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: car_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: start_at, type: TIMESTAMP, constraints: { nullable: false } }
+        - addForeignKeyConstraint:
+            baseTableName: test_drive_cars
+            baseColumnNames: car_id
+            constraintName: fk_test_drive_car
+            referencedTableName: cars
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: test_drive_requests
+            baseColumnNames: client_id
+            constraintName: fk_test_drive_request_client
+            referencedTableName: users
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: test_drive_requests
+            baseColumnNames: car_id
+            constraintName: fk_test_drive_request_car
+            referencedTableName: cars
+            referencedColumnNames: id
+
+  - changeSet:
+      id: 008-seed-data
+      author: impathy
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: "00000000-0000-0000-0000-000000000001" }
+              - column: { name: created_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: updated_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: removed, valueBoolean: false }
+              - column: { name: name, value: "System Admin" }
+              - column: { name: access_level, value: "ADMIN" }
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: "00000000-0000-0000-0000-000000000002" }
+              - column: { name: created_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: updated_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: removed, valueBoolean: false }
+              - column: { name: name, value: "Default Manager" }
+              - column: { name: access_level, value: "MANAGER" }
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: "00000000-0000-0000-0000-000000000003" }
+              - column: { name: created_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: updated_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: removed, valueBoolean: false }
+              - column: { name: name, value: "Warehouse Admin" }
+              - column: { name: access_level, value: "SKLAD_ADMIN" }
+        - insert:
+            tableName: users
+            columns:
+              - column: { name: id, value: "00000000-0000-0000-0000-000000000004" }
+              - column: { name: created_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: updated_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: removed, valueBoolean: false }
+              - column: { name: name, value: "Default Client" }
+              - column: { name: access_level, value: "CLIENT" }
+
+        - insert:
+            tableName: car_parts
+            columns:
+              - column: { name: id, value: "10000000-0000-0000-0000-000000000001" }
+              - column: { name: created_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: updated_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: removed, valueBoolean: false }
+              - column: { name: name, value: "17 Standard Wheels" }
+              - column: { name: component_type, value: "WHEELS" }
+              - column: { name: price, valueNumeric: 0 }
+        - insert:
+            tableName: car_parts
+            columns:
+              - column: { name: id, value: "10000000-0000-0000-0000-000000000002" }
+              - column: { name: created_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: updated_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: removed, valueBoolean: false }
+              - column: { name: name, value: "8AT" }
+              - column: { name: component_type, value: "TRANSMISSION" }
+              - column: { name: price, valueNumeric: 0 }
+
+        - insert:
+            tableName: car_part_compatible_models
+            columns:
+              - column: { name: car_part_id, value: "10000000-0000-0000-0000-000000000001" }
+              - column: { name: model_name, value: "BMW 320i" }
+        - insert:
+            tableName: car_part_compatible_models
+            columns:
+              - column: { name: car_part_id, value: "10000000-0000-0000-0000-000000000002" }
+              - column: { name: model_name, value: "BMW 320i" }
+
+        - insert:
+            tableName: cars
+            columns:
+              - column: { name: id, value: "20000000-0000-0000-0000-000000000001" }
+              - column: { name: created_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: updated_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: removed, valueBoolean: false }
+              - column: { name: brand, value: "BMW" }
+              - column: { name: model_name, value: "320i" }
+              - column: { name: body_type, value: "SEDAN" }
+              - column: { name: fuel_type, value: "PETROL" }
+              - column: { name: gearbox_type, value: "AUTOMATIC" }
+              - column: { name: drive_type, value: "RWD" }
+              - column: { name: color, value: "Black" }
+              - column: { name: engine_power_hp, valueNumeric: 184 }
+              - column: { name: engine_volume, valueNumeric: 2.0 }
+              - column: { name: base_price, valueNumeric: 100 }
+              - column: { name: extra_price, valueNumeric: 0 }
+
+        - insert:
+            tableName: car_base_parts
+            columns:
+              - column: { name: car_id, value: "20000000-0000-0000-0000-000000000001" }
+              - column: { name: car_part_id, value: "10000000-0000-0000-0000-000000000001" }
+        - insert:
+            tableName: car_base_parts
+            columns:
+              - column: { name: car_id, value: "20000000-0000-0000-0000-000000000001" }
+              - column: { name: car_part_id, value: "10000000-0000-0000-0000-000000000002" }
+
+        - insert:
+            tableName: test_drive_cars
+            columns:
+              - column: { name: id, value: "30000000-0000-0000-0000-000000000001" }
+              - column: { name: created_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: updated_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: removed, valueBoolean: false }
+              - column: { name: car_id, value: "20000000-0000-0000-0000-000000000001" }
+
+
+  - changeSet:
+      id: 009-create-outbox-messages
+      author: impathy
+      changes:
+        - createTable:
+            tableName: outbox_messages
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: event_type, type: VARCHAR(100), constraints: { nullable: false } }
+              - column: { name: aggregate_id, type: VARCHAR(100), constraints: { nullable: false } }
+              - column: { name: trace_id, type: VARCHAR(100), constraints: { nullable: false } }
+              - column: { name: payload, type: CLOB, constraints: { nullable: false } }
+              - column: { name: published, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+
+  - changeSet:
+      id: 010-create-build-orders
+      author: impathy
+      validCheckSum:
+        - 9:20496701385a66cd08509a5ece7183ab
+      changes:
+        - createTable:
+            tableName: build_orders
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: source_order_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: source_order_type, type: VARCHAR(50), constraints: { nullable: false } }
+              - column: { name: car_id, type: UUID, constraints: { nullable: true } }
+              - column: { name: manager_id, type: UUID, constraints: { nullable: true } }
+              - column: { name: warehouse_employee_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: trace_id, type: VARCHAR(100), constraints: { nullable: false } }
+              - column: { name: status, type: VARCHAR(50), constraints: { nullable: false } }
+        - createTable:
+            tableName: build_order_component_ids
+            columns:
+              - column: { name: build_order_id, type: UUID, constraints: { nullable: false } }
+              - column: { name: component_id, type: UUID, constraints: { nullable: false } }
+        - addForeignKeyConstraint:
+            baseTableName: build_order_component_ids
+            baseColumnNames: build_order_id
+            constraintName: fk_build_order_component_build_order
+            referencedTableName: build_orders
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: build_order_component_ids
+            baseColumnNames: component_id
+            constraintName: fk_build_order_component_part
+            referencedTableName: car_parts
+            referencedColumnNames: id
+
+  - changeSet:
+      id: 011-add-build-order-warehouse-employee
+      author: impathy
+      preConditions:
+        onFail: MARK_RAN
+        not:
+          columnExists:
+            tableName: build_orders
+            columnName: warehouse_employee_id
+      changes:
+        - addColumn:
+            tableName: build_orders
+            columns:
+              - column:
+                  name: warehouse_employee_id
+                  type: UUID
+        - update:
+            tableName: build_orders
+            columns:
+              - column:
+                  name: warehouse_employee_id
+                  value: 00000000-0000-0000-0000-000000000003
+            where: warehouse_employee_id IS NULL
+        - addNotNullConstraint:
+            tableName: build_orders
+            columnName: warehouse_employee_id
+            columnDataType: UUID
+
+  - changeSet:
+      id: 011-create-processed-messages
+      author: impathy
+      changes:
+        - createTable:
+            tableName: processed_messages
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: message_id, type: VARCHAR(100), constraints: { nullable: false, unique: true } }
+              - column: { name: message_type, type: VARCHAR(100), constraints: { nullable: false } }
+
+  - changeSet:
+      id: 012-create-stock-tables
+      author: impathy
+      changes:
+        - createTable:
+            tableName: car_stock
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: car_id, type: UUID, constraints: { nullable: false, unique: true } }
+              - column: { name: total_quantity, type: INT, constraints: { nullable: false } }
+              - column: { name: reserved_quantity, type: INT, constraints: { nullable: false } }
+        - createTable:
+            tableName: part_stock
+            columns:
+              - column: { name: id, type: UUID, constraints: { primaryKey: true, nullable: false } }
+              - column: { name: created_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: updated_at, type: TIMESTAMP, constraints: { nullable: false } }
+              - column: { name: removed, type: BOOLEAN, defaultValueBoolean: false, constraints: { nullable: false } }
+              - column: { name: car_part_id, type: UUID, constraints: { nullable: false, unique: true } }
+              - column: { name: total_quantity, type: INT, constraints: { nullable: false } }
+              - column: { name: reserved_quantity, type: INT, constraints: { nullable: false } }
+        - addForeignKeyConstraint:
+            baseTableName: car_stock
+            baseColumnNames: car_id
+            constraintName: fk_car_stock_car
+            referencedTableName: cars
+            referencedColumnNames: id
+        - addForeignKeyConstraint:
+            baseTableName: part_stock
+            baseColumnNames: car_part_id
+            constraintName: fk_part_stock_part
+            referencedTableName: car_parts
+            referencedColumnNames: id
+
+  - changeSet:
+      id: 013-seed-stock-data
+      author: impathy
+      changes:
+        - insert:
+            tableName: car_stock
+            columns:
+              - column: { name: id, value: "40000000-0000-0000-0000-000000000001" }
+              - column: { name: created_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: updated_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: removed, valueBoolean: false }
+              - column: { name: car_id, value: "20000000-0000-0000-0000-000000000001" }
+              - column: { name: total_quantity, valueNumeric: 1 }
+              - column: { name: reserved_quantity, valueNumeric: 0 }
+        - insert:
+            tableName: part_stock
+            columns:
+              - column: { name: id, value: "50000000-0000-0000-0000-000000000001" }
+              - column: { name: created_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: updated_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: removed, valueBoolean: false }
+              - column: { name: car_part_id, value: "10000000-0000-0000-0000-000000000001" }
+              - column: { name: total_quantity, valueNumeric: 4 }
+              - column: { name: reserved_quantity, valueNumeric: 0 }
+        - insert:
+            tableName: part_stock
+            columns:
+              - column: { name: id, value: "50000000-0000-0000-0000-000000000002" }
+              - column: { name: created_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: updated_at, valueDate: "2026-05-23T00:00:00" }
+              - column: { name: removed, valueBoolean: false }
+              - column: { name: car_part_id, value: "10000000-0000-0000-0000-000000000002" }
+              - column: { name: total_quantity, valueNumeric: 4 }
+              - column: { name: reserved_quantity, valueNumeric: 0 }

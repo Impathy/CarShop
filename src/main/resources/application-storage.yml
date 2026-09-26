@@ -1,0 +1,15 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/impathy_storage
+    username: impathy
+    password: impathy
+
+app:
+  grpc:
+    server-port: 9091
+  storage:
+    default-warehouse-user-id: 00000000-0000-0000-0000-000000000003
+
+springdoc:
+  swagger-ui:
+    oauth2-redirect-url: http://localhost:8082/swagger-ui/oauth2-redirect.html
